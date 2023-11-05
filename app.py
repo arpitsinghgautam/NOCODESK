@@ -1,11 +1,27 @@
 import streamlit as st
 import pandas as pd
+from PIL import Image
 from main import *
+import base64
+import io
+import tempfile
 import time
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
 from sklearn.model_selection import train_test_split
+
+st.set_page_config(
+    page_title="NOCODESK",
+    page_icon=":computer:",
+    layout="wide",
+    menu_items={
+        'Get Help': 'https://www.linkedin.com/in/arpitsinghgautam/',
+        'Report a bug': "https://github.com/arpitsinghgautam/NOCODESK/issues",
+        'About': " NOCODESK is an innovative machine learning platform designed to bridge the gap between theoretical knowledge and practical implementation of AI and ML concepts."
+    }
+)
+
 
 def nocodesk_Main():
     # Define the pages
@@ -14,27 +30,59 @@ def nocodesk_Main():
         "Learn ML Algos": 2,
         "Data Playground": 3,
         "Neural Networks": 4,
-        "About Hackathons and Future Goals": 5,
     }
     # Define the pre-loaded datasets
     car_price_data = pd.read_csv("CarPrice.csv")  # You should replace this with the actual path to your CSV file
     iris_data = pd.read_csv("IRIS.csv")
     problemtype = None
     flag = ""
-    # Page layout
-    st.set_page_config(layout="wide")
+    
+    image_file = 'assets/sidebar-2.jpg'
+    with open(image_file, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read())
+    st.markdown(
+        f"""
+        <style>
+        .css-6qob1r {{
+            background-image: url(data:image/{"png"};base64,{encoded_string.decode()});
+            background-size: cover;
+            colour:
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
+    
     # Sidebar
-    st.sidebar.title("NOCODESK")
+    st.sidebar.image("assets/Nocodesk.png")
+    # st.sidebar.title("NOCODESK")
     selected_page = st.sidebar.selectbox("Select a page", list(pages.keys()))
 
     # Main content area
     if pages[selected_page] == 1:
+        
+        mainpage_image_file = 'assets/sidebar-2.jpg'
+        with open(mainpage_image_file, "rb") as mainpage_image_file:
+            mainpage_encoded_string = base64.b64encode(mainpage_image_file.read())
+        st.markdown(
+            f"""
+            <style>
+            .stApp {{
+                background-image: url(data:image/{"png"};base64,{mainpage_encoded_string.decode()});
+                background-size: cover
+            }}
+            </style>
+            """,
+            unsafe_allow_html=True
+            )
         # Page 1: About the Product
-        st.title("NOCODESK")
+        st.image("assets/Nocodesk.png")
     
-        st.write("Welcome to NOCODESK, your one-stop solution for simplified machine learning pipelines.")
-    
+        st.write("Welcome to NOCODESK, your gateway to the world of artificial intelligence and machine learning! ")
+        st.write("Our platform is designed to make AI and ML concepts accessible and understandable for learners like you. Whether you're a student or an enthusiast, NOCODESK is here to help you bridge the gap between theory and practical implementation. With our user-friendly interface, you can easily preprocess data, select and train machine learning models, and evaluate their performance, all with just a few clicks. ")
+        st.write("Join us on this exciting journey to demystify AI and ML, and take your skills to the next level.")
+
         st.subheader("Our Mission")
         st.write("Our mission is to bridge the gap between theory and practical implementation of Artificial Intelligence (AI) and Machine Learning (ML). NOCODESK is designed to empower users with limited coding experience to perform data preprocessing, model selection, training, and evaluation with ease. We aim to make AI and ML accessible to everyone, regardless of their technical background.")
     
@@ -49,6 +97,20 @@ def nocodesk_Main():
         st.write("To get started with NOCODESK, navigate to the 'Data Playground' and follow the step-by-step instructions to preprocess your data, select a model, train it, and evaluate its performance.")
 
     elif pages[selected_page] == 2:
+        mainpage_image_file = 'assets/c.jpg'
+        with open(mainpage_image_file, "rb") as mainpage_image_file:
+            mainpage_encoded_string = base64.b64encode(mainpage_image_file.read())
+        st.markdown(
+            f"""
+            <style>
+            .stApp {{
+                background-image: url(data:image/{"png"};base64,{mainpage_encoded_string.decode()});
+                background-size: cover
+            }}
+            </style>
+            """,
+            unsafe_allow_html=True
+            )
         #Learning Tab
         st.title("Learn ML Algorithms")
         
@@ -148,6 +210,20 @@ def nocodesk_Main():
             st.write(predictions_cls)
 
     elif pages[selected_page] == 3:
+        mainpage_image_file = 'assets/e.jpg'
+        with open(mainpage_image_file, "rb") as mainpage_image_file:
+            mainpage_encoded_string = base64.b64encode(mainpage_image_file.read())
+        st.markdown(
+            f"""
+            <style>
+            .stApp {{
+                background-image: url(data:image/{"png"};base64,{mainpage_encoded_string.decode()});
+                background-size: cover
+            }}
+            </style>
+            """,
+            unsafe_allow_html=True
+            )
         # Page 3: Pipeline Tab
         st.title("Data Playground")
         
@@ -321,6 +397,20 @@ def nocodesk_Main():
 
 
     elif pages[selected_page] == 4:
+        mainpage_image_file = 'assets/d.jpg'
+        with open(mainpage_image_file, "rb") as mainpage_image_file:
+            mainpage_encoded_string = base64.b64encode(mainpage_image_file.read())
+        st.markdown(
+            f"""
+            <style>
+            .stApp {{
+                background-image: url(data:image/{"png"};base64,{mainpage_encoded_string.decode()});
+                background-size: cover
+            }}
+            </style>
+            """,
+            unsafe_allow_html=True
+            )
         # Page 4: Neural Networks Tab
         st.title("Neural Networks")
         st.header("Introduction to Neural Networks")
@@ -398,10 +488,6 @@ def nocodesk_Main():
 
             st.success("CNN has finished processing.")
 
-    elif pages[selected_page] == 5:
-        # Page 5: About Hackathons and Future Goals
-        st.title("About Hackathons and Future Goals")
-        # Add content about hackathons and future goals here
 
 
 def file_upload():
