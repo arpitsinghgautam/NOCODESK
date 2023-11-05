@@ -19,6 +19,7 @@ from lightgbm import LGBMRegressor, LGBMClassifier
 from sklearn.metrics import confusion_matrix, roc_curve, auc, roc_auc_score
 from sklearn.neighbors import KNeighborsRegressor, KNeighborsClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, mean_squared_error
+from sklearn.model_selection import KFold, cross_val_predict, train_test_split,GridSearchCV,cross_val_score
 from sklearn.model_selection import cross_val_score
 import streamlit as st
 
@@ -59,7 +60,7 @@ def data_preprocessing(data, scaling_method=None, encoding_method=None, scaling_
                         encoded_data = pd.get_dummies(encoded_data, columns=[column])
                     elif encoding_method == "Label Encoding":
                         le = LabelEncoder()
-                        encoded_data[column] = le.fit_transform(encoded_data[column])
+                        encoded_data[column] = le.fit_transform(data[column])
             except ValueError:
                 st.warning(f"Skipping encoding for column '{column}' (not suitable for encoding).")
 
@@ -72,7 +73,7 @@ def exploratory_data_analysis(data, methods_to_apply=None):
 
     if methods_to_apply is None:
         methods_to_apply = ["Summary Statistics", "Data Visualization", "Correlation Analysis", "Distribution Plots",
-                            "Pair Plots", "Categorical Data Visualization", "Box Plots",
+                            "Pair Plots", "Box Plots",
                             "Multivariate Analysis"]
 
     if not isinstance(data, pd.DataFrame):
@@ -93,8 +94,13 @@ def exploratory_data_analysis(data, methods_to_apply=None):
         st.write("\n")
 
     if "Correlation Analysis" in methods_to_apply:
+        encoded_data = data.copy()
+        label_encoder = LabelEncoder()
+        for column in data.columns:
+            if data[column].dtype == 'object':
+                encoded_data[column] = label_encoder.fit_transform(data[column])
         st.subheader("Correlation Analysis:")
-        corr_matrix = data.corr()
+        corr_matrix = encoded_data.corr()
         st.write(corr_matrix)
         st.write("\n")
 
@@ -113,17 +119,17 @@ def exploratory_data_analysis(data, methods_to_apply=None):
         st.pyplot(plt)
         st.write("\n")
 
-    if "Categorical Data Visualization" in methods_to_apply:
-        st.subheader("Categorical Data Visualization:")
-        df_cat = data.select_dtypes(exclude=['int64', 'float64'])
-        for column in df_cat.columns:
-            plt.figure(figsize=(6, 4))
-            sns.countplot(data=df_cat, x=column)
-            sns.histplot(df_cat[column], kde=True)
-            plt.title(f"Distribution of {column}")
-            st.pyplot(plt)
-        st.write("\n")
-
+    # if "Categorical Data Visualization" in methods_to_apply:
+    #     st.subheader("Categorical Data Visualization:")
+    #     df_cat = data.select_dtypes(exclude=['int64', 'float64'])
+    #     for column in df_cat.columns:
+    #         plt.figure(figsize=(6, 4))
+    #         sns.countplot(data=df_cat[column])
+    #         sns.histplot(df_cat[column], kde=True)
+    #         plt.title(f"Distribution of {column}")
+    #         st.pyplot(plt)
+    #     st.write("\n")
+    
     if "Box Plots" in methods_to_apply:
         st.subheader("Box Plots:")
         for column in data.columns:
@@ -140,41 +146,12 @@ def exploratory_data_analysis(data, methods_to_apply=None):
 
     if "Multivariate Analysis" in methods_to_apply:
         st.subheader("Multivariate Analysis:")
-        # Include multivariate analysis methods as needed
-        # Example: sm.OLS(data['target'], sm.add_constant(data[['feature1', 'feature2']])).fit()
+        df_num = data.select_dtypes(include=['int64', 'float64'])
+        plt.figure(figsize=(15,6))
+        correlation = df_num.corr( method='pearson' )
+        sns.heatmap( correlation, annot=True );
+        st.pyplot(plt)
         st.write("\n")
-
-# Example usage:
-# exploratory_data_analysis(your_data, methods_to_apply=["Summary Statistics", "Data Visualization"])
-
-
-def feature_engineering(data):
-    # Create a copy of the preprocessed data to avoid modifying the original
-    processed_data = data.copy()
-    
-    # Example Feature Engineering Techniques
-    # Modify and add features as needed
-    
-    # Example: Creating a new feature by combining two existing features
-    processed_data['new_feature'] = processed_data['feature1'] * processed_data['feature2']
-    
-    # Example: Binning a continuous variable
-    processed_data['binned_feature'] = pd.cut(processed_data['numeric_feature'], bins=5)
-    
-    # Example: Extracting datetime features
-    processed_data['day_of_week'] = processed_data['datetime_column'].dt.dayofweek
-    
-    # Example: Encoding categorical variables (one-hot encoding)
-    categorical_columns = ['categorical_feature1', 'categorical_feature2']
-    processed_data = pd.get_dummies(processed_data, columns=categorical_columns, drop_first=True)
-    
-    # You can add more feature engineering steps as needed
-    
-    return processed_data
-
-# Example usage:
-# processed_data = feature_engineering(preprocessed_data)
-
 
 
 def model_selection(data, problem_type, model_choice):
@@ -212,11 +189,6 @@ def model_selection(data, problem_type, model_choice):
 
     return model
 
-# Example usage for classification problem with Random Forest:
-# selected_model = model_selection(data, 'classification', 'Random Forest')
-
-# Example usage for regression problem with Linear Regression:
-# selected_model = model_selection(data, 'regression', 'Linear Regression')
 
 
 def model_training(model, X_train, y_train):
@@ -226,21 +198,15 @@ def model_training(model, X_train, y_train):
     except Exception as e:
         return str(e)
 
-# Example usage:
-# trained_model = model_training(selected_model, X_train, y_train)
-
-
-
-
 
 def model_evaluation(model, X_test, y_test, problem_type, cv=None):
     try:
         if problem_type == 'classification':
             y_pred = model.predict(X_test)
             accuracy = accuracy_score(y_test, y_pred)
-            precision = precision_score(y_test, y_pred)
-            recall = recall_score(y_test, y_pred)
-            f1 = f1_score(y_test, y_pred)
+            precision = precision_score(y_test, y_pred, average='weighted') 
+            recall = recall_score(y_test, y_pred, average='weighted')  
+            f1 = f1_score(y_test, y_pred, average='weighted')
             evaluation_metrics = {
                 'Accuracy': accuracy,
                 'Precision': precision,
@@ -264,12 +230,6 @@ def model_evaluation(model, X_test, y_test, problem_type, cv=None):
         return evaluation_metrics
     except Exception as e:
         return str(e)
-
-# Example usage for classification problem:
-# evaluation_results = model_evaluation(trained_model, X_test, y_test, 'classification', cv=5)
-
-# Example usage for regression problem:
-# evaluation_results = model_evaluation(trained_model, X_test, y_test, 'regression', cv=5)
 
 
 
@@ -336,9 +296,49 @@ def plot_compare(original_data, preprocessed_data, model, X_test, y_test, class_
 
     plt.show()
 
-# Example usage:
-# plot_compare(original_data, preprocessed_data, trained_model, X_test, y_test, class_labels)
+def generate_regression_dummy_data():
+    # Generate and return regression dummy data
+    return pd.DataFrame(data={'X': [1, 2, 3, 4, 5], 'y': [2, 4, 6, 8, 10]})
 
+def generate_classification_dummy_data():
+    # Generate and return classification dummy data
+    return pd.DataFrame(data={'Feature1': [1, 2, 3, 4, 5], 'Feature2': [4, 3, 5, 2, 1], 'Target': [1, 0, 1, 0, 1]})
+
+def algorithm_description(algorithm):
+    # Display algorithm description
+    if algorithm == "Linear Regression":
+        st.write("Linear regression is a simple linear modeling technique used to model the relationship between a dependent variable and one or more independent variables. It fits a linear equation to the data, making it useful for predicting a continuous target variable.")
+        st.write("Mathematically, linear regression can be represented as:\n\ny = mx + b")
+        st.write("Where 'y' is the dependent variable, 'x' is the independent variable, 'm' is the slope, and 'b' is the intercept.")
+    
+  
+def algorithm_equations(algorithm):
+    # Display math equations
+    if algorithm == "Linear Regression":
+        st.write("Math Equation:")
+        st.latex(r'y = mx + b')
+        # You can also show a diagram if available
+
+    # Add equations for other algorithms as needed
+
+def apply_algorithm(algorithm, dummy_data):
+    # Apply the selected algorithm to the dummy data and return results
+    if algorithm == "Linear Regression":
+        # Apply linear regression to the data and return predictions
+        model = LinearRegression()
+        X = dummy_data[['X']]
+        y = dummy_data['y']
+        model.fit(X, y)
+        predictions = model.predict(X)
+        return predictions
+
+    # Add algorithm-specific logic for other algorithms
+
+def algorithm_visual_explanation(algorithm):
+    # Visual explanation for algorithm
+    if algorithm == "Linear Regression":
+        st.write("Visual Explanation:")
+        # Show a diagram or plot to explain the algorithm
 
 
 
@@ -426,4 +426,4 @@ def model_evaluation(model, X_test, y_test, problem_type, cv=None):
 
 # Example usage to download the code for selected functions
 selected_functions = ["data_preprocessing", "exploratory_data_analysis", "model_selection", "model_training", "model_evaluation"]
-download_code(selected_functions, "machine_learning_code.py")
+download_code(selected_functions, "Nocodesk_Coding.py")
