@@ -25,7 +25,7 @@ NOCODESK is an innovative machine learning platform aimed at closing the chasm b
 - Research and Experimentation: Researchers can utilize NOCODESK for data analysis and quick experimentation. 🧪
 
 ## Demo Video 📽️
-[![Youtube Demo Link](assets\1.png)](https://youtu.be/aY4pZ4EAAek)
+[![Youtube Demo Link](assets/1.png)](https://youtu.be/aY4pZ4EAAek)
 
 <!-- [[If the above link dont work Click here!]](https://youtu.be/aY4pZ4EAAek) -->
 
