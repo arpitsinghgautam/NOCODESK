@@ -24,6 +24,11 @@ NOCODESK is an innovative machine learning platform aimed at closing the chasm b
 - Skill Enhancement: Professionals and enthusiasts can use it to brush up their machine learning skills. 💼
 - Research and Experimentation: Researchers can utilize NOCODESK for data analysis and quick experimentation. 🧪
 
+## Demo Video 📽️
+[![Youtube Demo Link](assets\1.png)](https://youtu.be/aY4pZ4EAAek)
+
+<!-- [[If the above link dont work Click here!]](https://youtu.be/aY4pZ4EAAek) -->
+
 ## How to Use NOCODESK 📝
 1. Navigate to our website (currently under development).
 2. Create an account or log in as a guest.
